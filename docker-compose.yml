@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - EMAIL_API_KEY=${EMAIL_API_KEY}
+      - FROM_EMAIL=${FROM_EMAIL}
+      - API_TOKEN=${API_TOKEN}
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+    networks:
+      - app-network
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_API_TOKEN=${API_TOKEN}
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  uploads:
